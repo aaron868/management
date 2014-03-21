@@ -1,0 +1,64 @@
+---
+
+- name: Install clamav packages
+  yum: name={{ item }} state=installed
+  with_items:
+      - clamav
+      - clamav-db
+      - clamav-unofficial-sigs
+  notify:
+    - Initialize antivirus database
+
+- name: Disable clam user login
+  user: name=clam shell=/sbin/nologin
+
+- name: Disable clam-update user login
+  user: name=clam-update shell=/sbin/nologin
+
+- name: Set permissions on antivirus database directory
+  file: path=/var/lib/clamav state=directory owner=clam group=clam
+
+- name: Set permissions on freshclam configuration
+  file: path=/etc/freshclam.conf owner=root group=root mode=0644
+
+- name: Daily clamav database update
+  cron: name="Daily Virus DB Update"
+        hour=2
+        minute=0
+        job="/usr/bin/freshclam"
+        state=present
+
+- name: Daily unofficial sig update
+  cron: name="Daily Unofficial DB Update"
+        hour=2
+        minute=30
+        job="/usr/bin/clamav-unofficial-sigs.sh 2>&1 | /usr/bin/logger -p local0.info -t clam-unofficial-sigs"
+        state=present
+
+- name: Daily clamav scan
+  cron: name="Daily Virus Scan"
+        hour=3
+        minute=0
+        job="/usr/bin/clamscan -r /  --detect-pua --exclude-dir=/sys/ --exclude-dir=/proc/ --exclude-dir=/dev/ --infected 2>&1 | /usr/bin/logger -p local0.info -t clamscan"
+        state=present
+
+- name: Remove default unofficial sig cron file
+  file: path=/etc/cron.d/clamav-unofficial-sigs state=absent
+
+  ###########################
+  # Freshclam conf 
+  ###########################
+- name: Disable /var/log/clamav logs and use syslog only
+  lineinfile: dest=/etc/freshclam.conf regexp=^UpdateLogFile state=absent
+
+- name: Include the time in the log
+  lineinfile: dest=/etc/freshclam.conf line='LogTime yes'
+
+- name: Set the local web proxy host
+  lineinfile: dest=/etc/freshclam.conf line='HTTPProxyServer {{ web_proxy_host }}'
+  when: web_proxy_host is defined
+
+- name: Set the local web proxy port
+  lineinfile: dest=/etc/freshclam.conf line='HTTPProxyPort {{ web_proxy_port }}'
+  when: web_proxy_port is defined
+

@@ -1,0 +1,8 @@
+---
+
+- name: Initialize antivirus database
+  command: /usr/bin/clamav-unofficial-sigs.sh
+  notify: Update default signatures
+
+- name: Update default signatures
+  command: freshclam
