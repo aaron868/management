@@ -1,0 +1,14 @@
+---
+
+- name: Change iptables configuration
+  command: /usr/sbin/ferm /etc/ferm/ferm.conf
+
+- name: Save iptables
+  command: service iptables save
+
+- name: Restart collectd
+  command: service collectd restart
+
+- name: Reload nginx
+  command: service nginx reload
+  ignore_errors: yes
