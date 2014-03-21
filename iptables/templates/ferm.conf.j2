@@ -1,0 +1,31 @@
+domain ip {
+    table filter {
+        chain LOGGING;
+        chain INPUT {
+            policy DROP;
+
+            # connection tracking
+            mod state {
+                state INVALID DROP;
+                state (RELATED ESTABLISHED) ACCEPT;
+            }
+
+            # allow local connections
+            interface lo ACCEPT;
+            
+            # respond to ping
+            protocol icmp icmpv6-type 8 ACCEPT;
+            
+            # remote administration from the admin network only
+            saddr {{ admin_network }}/{{ admin_network_CIDR }} proto tcp dport ssh ACCEPT;
+            
+        }
+        chain LOGGING {
+            mod limit limit 3/min LOG log-prefix 'iptables: ';
+            DROP;
+        }
+        chain FORWARD policy DROP;
+        chain OUTPUT policy ACCEPT;
+    }
+}
+@include 'ferm.d/';

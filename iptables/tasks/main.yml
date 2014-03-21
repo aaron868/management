@@ -1,0 +1,30 @@
+---
+
+- name: Install ferm for easy firewall management
+  yum: name=ferm state=installed
+
+- name: iptables is running and enabled
+  service: name=iptables state=started enabled=yes
+
+- name: iptables6 is disabled
+  service: name=ip6tables state=stopped enabled=no
+
+- name: Create a separate syslog log for iptables
+  copy: src=iptables.conf dest=/etc/rsyslog.d/iptables.conf owner=root group=root
+  notify:
+    - Restart rsyslog
+
+- name: Install iptables logrotate configuration
+  copy: src=iptables.logrotate dest=/etc/logrotate.d/iptables owner=root group=root mode=0644
+
+- name: Add ferm conf directory
+  file: path=/etc/ferm owner=root group=root mode=0700 state=directory
+
+- name: Add ferm snippet directory
+  file: path=/etc/ferm/ferm.d owner=root group=root mode=0700 state=directory
+
+- name: Set iptables base configuration
+  template: src=ferm.conf.j2 dest=/etc/ferm/ferm.conf owner=root group=root
+
+- name: Set iptables end configuration
+  copy: src=999_end dest=/etc/ferm/ferm.d/999_end owner=root group=root

@@ -1,0 +1,7 @@
+table filter chain INPUT {
+      # Block spammy netbios traffic so it isnt logged
+      protocol tcp dport (445 139) DROP;
+      protocol udp dport (137 138) DROP;
+
+      jump LOGGING;
+}

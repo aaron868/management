@@ -1,0 +1,17 @@
+---
+
+# Network Configuration settings
+
+# domain: domain.com
+# pool_master: host.domain.com
+
+# dns1: IP address
+# dns2: IP address
+# ntp_server: IP address
+
+# web_proxy_host: host.domain.com
+# web_proxy_address: IP address
+# web_proxy_port: 3128
+
+admin_network: IP address (192.168.1.0)
+admin_network_CIDR: 24
