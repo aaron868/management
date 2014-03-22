@@ -2,13 +2,14 @@
 
 ## Introduction
 
-This is the Ansible playbook for my infrastructure. This infrastructure is built on three elements:
+This is the Ansible playbook for my infrastructure. I'm sharing it so that it will save you some time and so that you will critique it. I'd like this playbook to eventually become a *best practice* configuration for CentOS servers.
 
-* CentOS 6 
-* CentOS 6 configured according to the DISA STIG for RHEL 6
-* XenServer 6.2 based VMs
+## Infrastructure Assumptions
+This playbook assumes several things about the IT infrastructure. It assumes a largely homogeneous set of servers that run only CentOS 6. These servers are VMs running in XenServer 6.2. The CentOS servers are hardened according to the US DISA STIG for RHEL 6. 
 
-Please check these closely before using them in your own environment. They work well for me but may not for you.
+I also locally mirror the default and EPEL repositories. It doesn't take that much space but adds to the speed, stability, and security of my infrastructure. The way yum selects mirrors can product odd results. And I do not trust all mirrors equally.
+
+Even though your infrastructure is likely different than mine, many of these roles should work for you. Please check these closely before using them in your own environment. And please offer suggestions and improvements. 
 
 ## Layout
 
