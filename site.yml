@@ -1,0 +1,26 @@
+---
+
+- hosts: vms
+  user: administrator
+  sudo: yes
+  gather_facts: False
+  roles:
+   - vm
+   - base
+   - auditd
+   - ssh
+   - iptables
+   - clamav
+   - syslog-ng-client
+
+- hosts: example.sharknet.us
+  user: administrator
+  sudo: yes
+  gather_facts: False
+  roles:
+   - ntp-client
+   - email-client
+   - ossec-client
+   - collectd-client
+   - syslog-ng-server
+   - end

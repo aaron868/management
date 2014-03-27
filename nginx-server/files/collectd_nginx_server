@@ -1,0 +1,6 @@
+LoadPlugin nfs
+LoadPlugin nginx
+
+<Plugin nginx>
+   URL "http://localhost/nginx_status"
+</Plugin>

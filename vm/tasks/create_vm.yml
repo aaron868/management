@@ -1,0 +1,45 @@
+---
+
+  - name: Prevent template from creating storage
+    command: xe template-param-remove uuid={{ centos_template_uuid }} param-name=other-config param-key=disks
+    ignore_errors: yes
+    delegate_to: "{{ pool_master }}"
+
+  - name: Create VM
+    command: xe vm-install template={{ centos_template_uuid }} new-name-label="{{ hostname }}" sr-uuid={{ primary_sr_uuid }}
+    register: vm
+    delegate_to: "{{ pool_master }}"
+
+  - name: Set the repository location
+    command: xe vm-param-set uuid={{ vm.stdout }} other-config:install-repository="{{ default_repository_url }}"
+    delegate_to: "{{ pool_master }}"
+
+  - name: Set the location of the kickstart file
+    command: xe vm-param-set uuid={{ vm.stdout }} PV-args="ks={{ kickstart_url }}/{{ hostname }}.cfg ksdevice=eth0"
+    delegate_to: "{{ pool_master }}"
+    
+  - name: Adding networks
+    command: xe vif-create vm-uuid={{ vm.stdout }} network-uuid={{ item.network_uuid }} mac={{ item.mac_address }} device={{ item.device_id }}
+    delegate_to: "{{ pool_master }}"
+    with_items: networks
+
+  - name: Allocate VM storage
+    command: xe vdi-create name-label="{{ hostname }} storage" sr-uuid={{ primary_sr_uuid }} type=system virtual-size={{ storage }}
+    register: disk
+    delegate_to: "{{ pool_master }}"
+
+  - name: Assign storage to VM
+    command: xe vbd-create vdi-uuid={{ disk.stdout }} vm-uuid={{ vm.stdout }} type=Disk bootable=true device=0
+    delegate_to: "{{ pool_master }}"
+
+  - name: Set the VM RAM limits
+    command: xe vm-memory-limits-set vm={{ vm.stdout }} static-min={{ ram }} static-max={{ ram }} dynamic-min={{ ram }} dynamic-max={{ ram }}
+    delegate_to: "{{ pool_master }}"
+
+  - name: Set the number of CPUs
+    command: xe vm-param-set VCPUs-max={{ vcpus }} uuid={{ vm.stdout }}
+    delegate_to: "{{ pool_master }}"
+
+  - name: Launch the VM
+    command: xe vm-start uuid={{ vm.stdout }}
+    delegate_to: "{{ pool_master }}"

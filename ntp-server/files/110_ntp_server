@@ -1,0 +1,4 @@
+table filter chain INPUT {
+       # NTP
+      protocol udp dport 123 ACCEPT;
+}

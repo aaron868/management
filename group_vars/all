@@ -1,17 +1,191 @@
 ---
 
-# Network Configuration settings
 
-# domain: domain.com
-# pool_master: host.domain.com
+#######################################
+# XenServer 
+#######################################
+centos_template_uuid: 8ad91af3-0075-f996-9c8b-d9301d4aa802
+primary_sr_uuid: 1b6766ac-9ed1-7300-aa11-2f2b7382ffe2
+vm_model_uuid: c8a1bf58-9d75-0601-ebde-ee18820819a3
 
-# dns1: IP address
-# dns2: IP address
-# ntp_server: IP address
+pool_master: example.sharknet.us
 
-# web_proxy_host: host.domain.com
-# web_proxy_address: IP address
-# web_proxy_port: 3128
 
-admin_network: IP address (192.168.1.0)
+#######################################
+# General network
+#######################################
+domain: sharknet.us
+centos_series: 6
+centos_version: 6.5
+centos_architecture: x86_64
+admin_email_address: 
+language: en_US.UTF-8
+timezone: America/New_York
+keyboard: us
+
+#######################################
+# Local subnets
+#######################################
+
+# End user VLAN 11
+user_vlan11_network_uuid: 66eee33d-c564-2249-fdff-b1544250f342
+user_vlan11_network: 192.168.11.0
+user_vlan11_network_netmask: 255.255.255.0
+user_vlan11_network_CIDR: 24
+user_vlan11_network_gateway: 192.168.11.1
+
+
+#######################################
+# Squid proxy settings
+#######################################
+web_proxy_hostname: example.sharknet.us
+web_proxy_ip_address: 192.168.x.x
+web_proxy_port: 3128
+web_proxy_cache_size: 2048
+
+#######################################
+# SSH 
+#######################################
+admin_network: 192.168.x.x
 admin_network_CIDR: 24
+ssh_port: 22
+
+#######################################
+# Repository configuration
+#######################################
+default_repository_mirror_hostname: rsync://mirrors.usc.edu
+epel_repository_mirror_hostname: rsync://mirror.pnl.gov
+default_repository_hostname: example.sharknet.us
+epel_repository_hostname: example.sharknet.us
+kickstart_repository_hostname: example.sharknet.us
+
+default_repository_url: http://{{ default_repository_hostname }}/CentOS/{{ centos_series }}/os/{{ centos_architecture }}/
+kickstart_url: http://{{ kickstart_repository_hostname }}/CentOS/kickstart
+epel_repository_url: http://{{ epel_repository_hostname }}/epel/{{ centos_series }}/
+
+xen_tools_gzip_file_url: "{{ default_repository_hostname }}/XenServer-6.2.0/tools/xen_tools.tar.gz"
+
+mount_point: /mnt/storage/
+storage_root: /mnt/storage/example
+
+repository_http_port: 80
+
+#######################################
+# Server IP addresess
+#######################################
+dns1_server_ip: 192.168.x.x
+dns2_server_ip: 192.168.x.x
+ossec_server_ip: 192.168.x.x
+collectd_server_ip: 192.168.x.x
+ntp_server_ip: 192.168.x.x
+email_server_relay_hostname: example.sharknet.us
+iscsi_server_ip: 192.168.x.x
+
+#######################################
+# Cron Scheduling
+#######################################
+epel_repository_server_sync:
+    hour: 1
+    minute: 0
+
+default_repository_server_sync:
+    hour: 2
+    minute: 0
+
+clamav_scan:
+    hour: 3
+    minute: 0
+
+clamav_official_db_update:
+    hour: 2
+    minute: 0
+
+clamav_unofficial_db_update:
+    hour: 2
+    minute: 30
+
+#######################################
+# NTP, Squid allowed nets
+#######################################
+
+allowed_networks:
+    - network: 192.168.x.x
+      netmask: 255.255.255.0
+      cidr: 24
+    - network: 192.168.x.x
+      netmask: 255.255.255.0
+      cidr: 24
+
+
+#######################################
+# SCAP
+#######################################
+setuid_programs:
+    - /sbin/netreport
+    - /sbin/pam_timestamp_check
+    - /sbin/unix_chkpwd
+    - /usr/sbin/usernetctl
+    - /usr/sbin/userhelper
+    - /usr/bin/newgrp
+    - /usr/bin/at
+    - /usr/bin/pkexec
+    - /usr/bin/gpasswd
+    - /usr/bin/chsh
+    - /usr/bin/crontab
+    - /usr/bin/chfn
+    - /usr/bin/sudo
+    - /usr/bin/chage
+    - /usr/bin/passwd
+    - /usr/libexec/polkit-1/polkit-agent-helper-1
+    - /usr/libexec/pt_chown
+    - /usr/libexec/abrt-action-install-debuginfo-to-abrt-cache
+    - /usr/libexec/utempter/utempter
+    - /usr/libexec/openssh/ssh-keysign
+    - /bin/su
+    - /bin/mount
+    - /bin/umount
+    - /bin/ping6
+    - /bin/ping
+
+#######################################
+# Logging
+#######################################
+
+log_server_ip: 192.168.x.x
+syslog_tcp_port: 514
+syslog_udp_port: 514
+remote_log_path: /var/log/remote
+ossec_server_hostname: example
+
+device_clients:
+    - switch
+    - router
+    - wap
+    - nas
+
+#######################################
+# mySQL
+#######################################
+mysql_server: example.sharknet.us
+mysql_tcp_port: 3306
+databases:
+    - db1
+    - db2
+ 
+
+######################################################
+# Passwords & Confidential Data: Going to vault soon.
+#####################################################
+root_password_sha512_hash: 
+admin_password_sha512_hash: 
+mysql_root_password: 
+
+mysql_users:
+    - name: admin 
+      host: "%"
+      password: 
+      priv: "db1.*:ALL/db2.*:ALL"
+    - name: jiradbuser
+      host: "%"
+      password:  
+      priv: "jiradb.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,INDEX"

@@ -1,0 +1,48 @@
+---
+
+- name: Install MySQL
+  yum: name={{ item }} state=installed
+  with_items:
+      - mysql-server
+      - mysql
+      - MySQL-python
+
+- name: mysql running
+  service: name=mysqld state=started enabled=yes
+
+# 'localhost' needs to be the last item for idempotency, see
+# http://ansible.cc/docs/modules.html#mysql-user
+- name: update mysql root password for all root accounts
+  mysql_user: name=root host={{ item }} password='{{ mysql_root_password }}'
+  with_items:
+    - "{{ inventory_hostname }}"
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: write root conf file
+  action: template src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0600
+
+- name: ensure anonymous users are not in the database
+  mysql_user: name='' host={{ item }} state=absent
+  with_items:
+    - localhost
+    - "{{ inventory_hostname }}"
+
+- name: remove the test database
+  mysql_db: name=test state=absent
+
+- name: Add databases
+  mysql_db: name={{ item }} encoding=utf8 collation=utf8_bin state=present
+  with_items: databases
+  
+- name: add mysql users
+  mysql_user: name={{ item.name }} 
+              host={{ item.host }} 
+              password={{ item.password }}
+              'priv={{ item.priv }}'
+              state=present
+  with_items: mysql_users
+
+- name: Set iptables configuration
+  template: src=110_mysql_server.j2 dest=/etc/ferm/ferm.d/110_mysql_server owner=root group=root

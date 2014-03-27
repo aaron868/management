@@ -1,0 +1,4 @@
+table filter chain INPUT {
+      # web traffic
+      protocol tcp dport 80 ACCEPT;
+}

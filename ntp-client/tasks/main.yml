@@ -1,0 +1,9 @@
+---
+
+- name: Set ntp configuration
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf owner=root group=root
+  notify:
+    - restart ntpd
+
+- name: Ensure that ntpd is running
+  service: name=ntpd state=started enabled=yes

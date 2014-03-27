@@ -1,0 +1,11 @@
+---
+
+- name: restart crond
+  service: name=crond state=restarted
+
+- name: restart network
+  service: name=network state=restarted
+
+- name: reload sysctl.conf
+  command: /sbin/sysctl -p
+

@@ -1,0 +1,71 @@
+#platform=x86, AMD64, or Intel EM64T
+
+# Install OS instead of upgrade
+install
+url --url="{{ default_repository_url }}"
+
+# Language settings
+lang {{ language }}
+timezone  {{ timezone }}
+keyboard {{ keyboard }}
+
+# Forces the text installer to be used (saves time)
+text
+skipx
+firstboot --disable
+
+# Security
+rootpw --iscrypted {{ root_password_sha512_hash }}
+auth  --useshadow  --passalgo=sha512
+firewall --enabled --ssh --service=ssh
+selinux --enforcing
+user --name=admin --groups=wheel --iscrypted --password={{ admin_password_sha512_hash }} 
+
+# Installation logging level
+logging --level=info
+
+# Network information
+network  --bootproto=static --device=eth0 --onboot=on --ip={{ hostvars[item]['networks'][0]['ip_address'] }} --netmask={{ hostvars[item]['networks'][0]['netmask'] }} --gateway={{ hostvars[item]['default_gateway'] }} --nameserver={{ dns1_server_ip }} --hostname={{ item }} --noipv6
+
+# System bootloader configuration
+bootloader --location=mbr --driveorder=xvda --append="console=hvc0"
+zerombr
+clearpart --drives=xvda --all --initlabel
+
+# Disk partitioning information
+part /tmp            --bytes-per-inode=4096 --ondisk=xvda --fstype="ext4" --size=2048 --fsoptions="nodev,nosuid,noexec"
+part /var            --bytes-per-inode=4096 --ondisk=xvda --fstype="ext4" --size={{ hostvars[item]['partitions']['var_size'] }} --fsoptions="defaults,nodev"
+part /var/log        --bytes-per-inode=4096 --ondisk=xvda --fstype="ext4" --size=2048 --fsoptions="defaults,nodev"
+part /var/log/audit  --bytes-per-inode=4096 --ondisk=xvda --fstype="ext4" --size=1024 --fsoptions="defaults,nodev"
+part /home           --bytes-per-inode=4096 --ondisk=xvda --fstype="ext4" --size={{ hostvars[item]['partitions']['home_size'] }} --fsoptions="nodev"
+part /boot           --bytes-per-inode=4096 --ondisk=xvda --asprimary --fstype="ext2" --size=100 --fsoptions="defaults,nodev"
+part swap            --bytes-per-inode=4096 --ondisk=xvda --asprimary --fstype="swap" --recommended
+part /               --bytes-per-inode=4096 --ondisk=xvda --asprimary --fstype="ext4" --size=20480
+
+# Reboot after installation
+reboot
+
+%packages
+@base
+@server-policy
+%end
+
+%post
+# Add lines to /etc/fstab
+echo /tmp /var/tmp none bind 0 0 >> /etc/fstab
+sed -i 's%^tmpfs.*%tmpfs /dev/shm tmpfs defaults,noexec,nodev,nosuid 0 0%g' /etc/fstab
+
+# Enable wheel group sudo access
+echo '%wheel        ALL=(ALL)       ALL' >> /etc/sudoers
+
+# Install xen tools automatically
+cd /root
+wget {{ xen_tools_gzip_file_url }}
+tar xvfz xen_tools.tar.gz
+/root/Linux/install.sh -n
+rm -rf Linux/
+rm xen_tools.tar.gz
+
+reboot
+
+# Now let Ansible take over

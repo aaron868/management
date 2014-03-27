@@ -1,0 +1,14 @@
+DEVICE=eth{{item.device_id}}
+TYPE=Ethernet
+ONBOOT=yes
+NM_CONTROLLED=yes
+PEERDNS=no
+{% if item.boot_protocol == "dhcp" %}
+BOOTPROTO=dhcp
+DHCP_HOSTNAME=`hostname`
+HWADDR={{ item.mac_address }}
+{% else %}
+BOOTPROTO=static
+IPADDR={{ item.ip_address }}
+NETMASK={{ item.netmask }}
+{% endif %}

@@ -1,0 +1,4 @@
+table filter chain INPUT {
+    # squid server
+    protocol tcp dport {{ web_proxy_port }} ACCEPT;
+}

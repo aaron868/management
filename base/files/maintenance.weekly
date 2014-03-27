@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Clean up yum
+yum clean packages
+yum clean metadata
+yum clean dbcache
+yum clean all 
+yum makecache
+
+# Delete old kernels
+package-cleanup --oldkernels --count=1 -y 

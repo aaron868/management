@@ -1,0 +1,326 @@
+---
+
+  ###########################
+  # Packages 
+  ###########################
+  - name: Enable libselinux-python for Ansible
+    yum: name=libselinux-python state=installed
+
+  - name: Copy local repo conf file
+    template: src=CentOS-Base.repo.j2 dest=/etc/yum.repos.d/CentOS-Base.repo owner=root group=root mode=0644
+
+  - name: Copy local epel repo
+    template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo owner=root group=root mode=0644
+
+  - name: Add EPEL GPG key
+    get_url: url=http://mirror.pnl.gov/epel/RPM-GPG-KEY-EPEL-6  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 owner=root group=root mode=0644
+
+  - name: Disable fastest mirror plugin
+    lineinfile: dest=/etc/yum/pluginconf.d/fastestmirror.conf regexp=^enabled line='enabled = 1'
+
+  - name: Install core packages
+    yum: name={{ item }} state=installed
+    with_items:
+      - yum-plugin-protectbase.noarch
+      - mlocate
+      - vim-minimal
+      - mailx
+      - ntp
+      - git
+      - wget
+
+  - name: Remove uneeded packages
+    yum: name={{ item }} state=absent
+    with_items:
+      - setroubleshoot
+      - mcstrans
+      - telnet-server
+      - telnet
+      - rsh-server
+      - rsh
+      - ypbind
+      - ypserv
+      - tftp
+      - tftp-server
+      - talk
+      - talk-server
+      - xinetd
+      - chargen-dgram
+      - chargen-stream
+      - daytime-dgram
+      - daytime-stream
+      - echo-dgram
+      - echo-stream
+      - tcpmux-server
+      - autofs
+      - wireless-tools
+ 
+  - name: Remove X Windows package
+    yum: name="@X Window System" state=absent
+
+ 
+  ###########################
+  # Network 
+  ###########################
+  - name: Set the hostname and gateway
+    template: src=network.j2 dest=/etc/sysconfig/network
+
+  - name: Copy standard ethernet configuration files
+    template: src=ifcfg-eth.j2 dest=/etc/sysconfig/network-scripts/ifcfg-eth{{ item.device_id }}
+    with_items: networks
+    notify:
+       - restart network
+
+  - name: Copy standard DNS information
+    template: src=resolv.j2 dest=/etc/resolv.conf
+
+  # - name: Set timezone to eastern
+  #   command: ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
+
+  ###########################
+  # Basic System 
+  ###########################
+
+  - name: Set clock
+    copy: src=clock dest=/etc/sysconfig/clock owner=root group=root
+
+  - name: Set languages
+    copy: src=i18n dest=/etc/sysconfig/i18n owner=root group=root
+
+  - name: Set boot mode to verbose.
+    lineinfile: dest=/etc/sysconfig/init regexp=^BOOTUP line='BOOTUP=verbose'
+
+  - name: Set high resolution console mode. Turn on advanced boot screen.
+    command: sed -i 's/rhgb quiet/vga=791/g' /etc/grub.conf
+
+  - name: Set keyboard options
+    copy: src=keyboard dest=/etc/sysconfig/keyboard owner=root group=root
+
+  ###########################
+  # Kernel 
+  ###########################
+  - name: Disable unneeded kernel modules
+    copy: src=disabled.conf dest=/etc/modprobe.d/disabled.conf owner=root group=root
+
+  - name: Delete broken default paramaters
+    lineinfile: dest=/etc/sysctl.conf line='{{ item }}' state=absent
+    with_items:
+      - net.bridge.bridge-nf-call-ip6tables = 0
+      - net.bridge.bridge-nf-call-iptables = 0
+      - net.bridge.bridge-nf-call-arptables = 0
+    notify:
+      - reload sysctl.conf
+
+  - name: Restrict Core Dumps
+    lineinfile: dest=/etc/sysctl.conf regexp='^fs.suid_dumpable' line='fs.suid_dumpable = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable ExecShield
+    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.exec-shield' line='kernel.exec-shield = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Randomized Virtual Memory Region Placement
+    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.randomize_va_space' line='kernel.randomize_va_space = 2'
+    notify:
+      - reload sysctl.conf
+
+  - name: Restrict Access to Kernel Message Buffer
+    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.dmesg_restrict' line='kernel.dmesg_restrict = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Sending ICMP Redirects by Default
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.send_redirects' line='net.ipv4.conf.default.send_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Sending ICMP Redirects for All Interfaces
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.send_redirects' line='net.ipv4.conf.all.send_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting Source-Routed Packets for All Interfaces
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.accept_source_route' line='net.ipv4.conf.all.accept_source_route = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting ICMP Redirects for All Interfaces
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.accept_redirects' line='net.ipv4.conf.all.accept_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting Secure Redirects for All Interfaces
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.secure_redirects' line='net.ipv4.conf.all.secure_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Log Martian Packets
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.log_martians' line='net.ipv4.conf.all.log_martians = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting Source-Routed Packets By Default
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.accept_source_route' line='net.ipv4.conf.default.accept_source_route = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting ICMP Redirects By Default
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.accept_redirects' line='net.ipv4.conf.default.accept_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Disable Kernel Parameter for Accepting Secure Redirects By Default
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.secure_redirects' line='net.ipv4.conf.default.secure_redirects = 0'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Ignore ICMP Broadcast Echo Requests
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.icmp_echo_ignore_broadcasts' line='net.ipv4.icmp_echo_ignore_broadcasts = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Ignore Bogus ICMP Error Responses
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.icmp_ignore_bogus_error_responses' line='net.ipv4.icmp_ignore_bogus_error_responses = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Use TCP Syncookies
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.tcp_syncookies' line='net.ipv4.tcp_syncookies = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Use Reverse Path Filtering for All Interfaces
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.rp_filter' line='net.ipv4.conf.all.rp_filter = 1'
+    notify:
+      - reload sysctl.conf
+
+  - name: Enable Kernel Parameter to Use Reverse Path Filtering by Default
+    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.rp_filter' line='net.ipv4.conf.default.rp_filter = 1'
+    notify:
+      - reload sysctl.conf
+
+  # - name: Disable Accepting IPv6 Redirects
+  #   lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv6.conf.default.accept_redirects' line='net.ipv6.conf.default.accept_redirects = 0'
+  #   notify:
+  #     - reload sysctl.conf
+
+  - name: Disable kdump
+    service: name=kdump state=stopped enabled=no
+
+  ###########################
+  # Maintenance
+  ###########################
+  - name: Set daily maintenance tasks
+    copy: src=maintenance.daily dest=/etc/cron.daily/maintenance.daily owner=root group=root mode=0700
+
+  - name: Set weekly maintenance tasks
+    copy: src=maintenance.weekly dest=/etc/cron.weekly/maintenance.weekly owner=root group=root mode=0700
+
+  ###########################
+  # SELinux
+  ###########################
+
+  - name: Enable SELinux
+    selinux: policy=targeted state=enforcing
+
+  - name: Enable the SELinux Context Restoration Service (restorecond)
+    service: name=restorecond  state=started enabled=yes
+
+  ###########################
+  # Basic Security
+  ###########################
+
+  - name: Ensure grub.conf has correct file permissions
+    file: path=/etc/grub.conf owner=root group=root mode=0600
+
+  - name: Ensure boot is password protected
+    lineinfile: dest=/etc/grub.conf regexp=^password line='password --encrypted $6$p5lIqMXvh0h06WQM$8uBgmOVe..2sy7lFHfifxwddW7cnER2mFYGIBddEixFGWGOojqbgzOcVSEpwQBMC.9cvkp3jp1WelqDsmJxBI.'
+ 
+  - name: Enable Auditing for Processes Which Start Prior to the Audit Daemon
+    command: sed -i '/kernel/ {/audit=1/! s/.*/& audit=1/}' /etc/grub.conf
+
+  - name: Ensure single user mode requires a password
+    lineinfile: dest=/etc/sysconfig/init regexp=^SINGLE line='SINGLE=/sbin/sulogin'
+
+  - name: Disable interactive boot
+    lineinfile: dest=/etc/sysconfig/init regexp=^PROMPT line='PROMPT=no'
+
+  - name: Restrict Core Dumps
+    lineinfile: dest=/etc/security/limits.conf regexp='^\* hard' line='* hard core 0'
+
+  - name: Ensure /etc/shadow is owned by root
+    file: path=/etc/shadow owner=root group=root mode=0000
+
+  - name: Ensure /etc/group is owned by root
+    file: path=/etc/group owner=root group=root mode=0644
+
+  - name: Ensure /etc/gshadow is owned by root
+    file: path=/etc/gshadow owner=root group=root mode=0000
+
+  - name: Ensure /etc/passwd is owned by root
+    file: path=/etc/passwd owner=root group=root mode=0644
+
+  - name: Verify that Shared Library Files Have Root Ownership
+    file: path={{ item }} owner=root group=root state=directory recurse=yes
+    with_items:
+      - /lib
+      - /lib64
+      - /usr/lib
+      - /usr/lib64
+
+  - name: Verify that Shared Executable Files Have Root Ownership
+    file: path={{ item }} owner=root group=root state=directory recurse=yes
+    with_items:
+      - /bin
+      - /usr/bin
+      - /usr/local/bin
+      - /sbin
+      - /usr/sbin
+      - /usr/local/sbin
+
+  - name: Set Daemon Umask
+    lineinfile: dest=/etc/sysconfig/init regexp=^umask line='umask 027'
+
+  - name: Verify prelink file has the correct permissions
+    file: path=/etc/sysconfig/prelink owner=root group=root mode=0600
+
+  - name: Disable prelinking
+    lineinfile: dest=/etc/sysconfig/prelink regexp='^PRELINKING' line='PRELINKING=no'
+
+  - name: Disable abrtd
+    service: name=abrtd  state=stopped enabled=no
+
+  - name: Disable atd
+    service: name=atd  state=stopped enabled=no
+
+  - name: Restrict Virtual Console Root Logins
+    lineinfile: dest=/etc/securetty regexp='^vc' state=absent
+
+  - name: Restrict Serial Port Root Logins
+    lineinfile: dest=/etc/securetty regexp='^tty' state=absent
+
+  - name: Prevent Log In to Accounts With Empty Password
+    copy: src=system-auth dest=/etc/pam.d/system-auth owner=root group=root mode=0644
+
+  - name: Set Password Attributes
+    copy: src=login.defs dest=/etc/login.defs owner=root group=root mode=0644
+
+  - name: Set Password Hashing Algorithm in /etc/libuser.conf
+    lineinfile: dest=/etc/libuser.conf regexp='^crypt_style' line='crypt_style = sha512'
+
+  - name: Modify the System Login Banner
+    copy: src=issue dest=/etc/issue owner=root group=root mode=0644
+
+  ###########################
+  # cron 
+  ###########################
+
+  - name: Enable crond
+    service: name=crond  state=started enabled=yes
+
+  - name: Set crond configuration. Disable email and enable syslog
+    lineinfile: dest=/etc/sysconfig/crond regexp='^CRONDARGS' line='CRONDARGS="-m off -s"'
+    notify:
+    - restart crond

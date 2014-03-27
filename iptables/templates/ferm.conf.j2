@@ -14,9 +14,9 @@ domain ip {
             interface lo ACCEPT;
             
             # respond to ping
-            protocol icmp icmpv6-type 8 ACCEPT;
+            proto icmp icmp-type echo-request ACCEPT;
             
-            # remote administration from the admin network only
+            # remote administration from the company network
             saddr {{ admin_network }}/{{ admin_network_CIDR }} proto tcp dport ssh ACCEPT;
             
         }

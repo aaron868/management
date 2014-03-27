@@ -9,6 +9,8 @@
 - name: Restart collectd
   command: service collectd restart
 
+# I have many web servers so this is here to restart them at the end. Fails when nginx is not installed
+# but the play continues.
 - name: Reload nginx
   command: service nginx reload
   ignore_errors: yes

@@ -1,0 +1,4 @@
+search {{ domain }}
+{% for item in dns %}
+nameserver {{ item }}
+{% endfor %}

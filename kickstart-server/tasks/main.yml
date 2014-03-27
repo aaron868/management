@@ -1,0 +1,8 @@
+---
+ 
+- name: Copy kickstart file for CentOS auto install
+  template: src=host.cfg.j2 
+            dest={{ storage_root }}/CentOS/kickstart/{{ hostvars[item]['hostname'] }}.cfg
+  with_items: groups['vms']
+
+

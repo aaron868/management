@@ -1,0 +1,23 @@
+---
+
+- name: Install nginx
+  yum: name={{ item }} state=present
+  with_items:
+     - nginx
+     - collectd-nginx
+    
+- name: Set iptables configuration
+  copy: src=120_web_server dest=/etc/ferm/ferm.d/120_web_server owner=root group=root
+
+- name: Set the core nginx configuration
+  template: src=nginx.conf.j2 
+            dest=/etc/nginx/nginx.conf
+  
+- name: Copy local collectd plugins
+  copy: src=collectd_nginx_server 
+        dest=/etc/collectd.d/collectd_nginx_server
+        owner=root 
+        group=root
+
+- name: Make sure key services are running now
+  service: name=nginx state=started enabled=yes

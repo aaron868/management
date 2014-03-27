@@ -1,0 +1,21 @@
+---
+# Role: NTP server
+
+hostname: example
+ram: 1GiB
+vcpus: 1
+storage: 40GiB
+default_gateway: 192.168.x.1
+dns: 
+ - "{{ dns1_server_ip }}"
+ - "{{ dns2_server_ip }}"
+networks:
+    - device_id: 0
+      network_uuid: "{{ vlan30_network_uuid }}"
+      mac_address: AF:B7:F3:7D:37:01
+      boot_protocol: static
+      ip_address: 192.168.x.x
+      netmask: 255.255.255.0
+partitions:
+  var_size: 4096
+  home_size: 5120

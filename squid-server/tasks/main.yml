@@ -1,0 +1,15 @@
+---
+
+- name: Install squid server
+  yum: name=squid state=installed
+
+- name: squid running
+  service: name=squid state=started enabled=yes
+
+- name: Copy conf file
+  template: src=squid.conf.j2 dest=/etc/squid/squid.conf owner=root group=root mode=0644
+  notify:
+    - restart squid 
+
+- name: Set iptables configuration
+  template: src=108_squid_server.j2 dest=/etc/ferm/ferm.d/108_squid_server owner=root group=root

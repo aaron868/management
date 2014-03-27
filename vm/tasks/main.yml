@@ -1,0 +1,13 @@
+---
+
+  - name: Check if VM exists
+    command: xe vm-list name-label="{{ hostname }}"
+    register: vm_found
+    delegate_to: "{{ pool_master }}"
+
+  - include: create_vm.yml
+    when: vm_found.stdout == ""
+
+  - name: Wait for the Kickstart install to complete and the VM to reboot
+    local_action: wait_for host={{ hostname }}.{{ domain }} port={{ ssh_port }} delay=5 timeout=1200 state=started
+

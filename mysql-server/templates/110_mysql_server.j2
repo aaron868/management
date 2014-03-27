@@ -1,0 +1,3 @@
+table filter chain INPUT {
+     protocol tcp dport {{ mysql_tcp_port }} ACCEPT;
+}

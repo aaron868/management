@@ -9,14 +9,6 @@
 - name: iptables6 is disabled
   service: name=ip6tables state=stopped enabled=no
 
-- name: Create a separate syslog log for iptables
-  copy: src=iptables.conf dest=/etc/rsyslog.d/iptables.conf owner=root group=root
-  notify:
-    - Restart rsyslog
-
-- name: Install iptables logrotate configuration
-  copy: src=iptables.logrotate dest=/etc/logrotate.d/iptables owner=root group=root mode=0644
-
 - name: Add ferm conf directory
   file: path=/etc/ferm owner=root group=root mode=0700 state=directory
 

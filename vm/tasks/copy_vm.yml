@@ -1,0 +1,32 @@
+---
+
+  - name: Copy VM as full Copy
+    command: xe vm-copy vm={{ vm_model_uuid }} new-name-label={{ hostname }} sr-uuid={{ primary_sr_uuid }}
+    register: vm
+    delegate_to: "{{ pool_master }}"
+
+  - name: Find VIF of new copy
+    command: xe vm-vif-list vm={{ vm.stdout }} params=uuid --minimal
+    register: vif
+    delegate_to: "{{ pool_master }}"
+
+  - name: Delete model network settings from new copy.
+    command: xe vif-destroy uuid={{ vif.stdout }}
+    delegate_to: "{{ pool_master }}"
+    
+  - name: Adding networks
+    command: xe vif-create vm-uuid={{ vm.stdout }} network-uuid={{ item.network_uuid }} mac={{ item.mac_address }} device={{ item.device_id }}
+    delegate_to: "{{ pool_master }}"
+    with_items: networks
+
+  - name: Set the VM RAM limits
+    command: xe vm-memory-limits-set vm={{ vm.stdout }} static-min={{ ram }} static-max={{ ram }} dynamic-min={{ ram }} dynamic-max={{ ram }}
+    delegate_to: "{{ pool_master }}"
+
+  - name: Set the number of CPUs
+    command: xe vm-param-set VCPUs-max={{ vcpus }} uuid={{ vm.stdout }}
+    delegate_to: "{{ pool_master }}"
+
+  - name: Launch the VM
+    command: xe vm-start uuid={{ vm.stdout }}
+    delegate_to: "{{ pool_master }}"
