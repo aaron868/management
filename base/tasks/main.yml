@@ -74,8 +74,6 @@
   - name: Copy standard DNS information
     template: src=resolv.j2 dest=/etc/resolv.conf
 
-  # - name: Set timezone to eastern
-  #   command: ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
 
   ###########################
   # Basic System 

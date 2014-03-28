@@ -55,9 +55,6 @@ reboot
 echo /tmp /var/tmp none bind 0 0 >> /etc/fstab
 sed -i 's%^tmpfs.*%tmpfs /dev/shm tmpfs defaults,noexec,nodev,nosuid 0 0%g' /etc/fstab
 
-# Enable wheel group sudo access
-echo '%wheel        ALL=(ALL)       ALL' >> /etc/sudoers
-
 # Install xen tools automatically
 cd /root
 wget {{ xen_tools_gzip_file_url }}
