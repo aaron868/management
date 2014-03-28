@@ -6,6 +6,8 @@ This is the Ansible playbook for my infrastructure. I'm sharing it so that it wi
 
 It's not entirely plug-n-play. My goal is that you can use these roles yourself unmodified by only changing the values in the `groups_vars/all` file. 
 
+To run these plays I use the following Ansible command: `ansible-playbook -i production.hosts site.yml -K -k`
+
 ## Infrastructure Assumptions
 This playbook assumes several things about the IT infrastructure. It assumes a largely homogeneous set of servers that run only CentOS 6. These servers are VMs running in XenServer 6.2. The CentOS servers are hardened according to the US DISA STIG for RHEL 6. 
 
