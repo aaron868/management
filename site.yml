@@ -7,6 +7,7 @@
   roles:
    - vm
    - base
+   - network
    - auditd
    - ssh
    - iptables
