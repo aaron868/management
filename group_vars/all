@@ -26,13 +26,30 @@ keyboard: us
 #######################################
 # Local subnets
 #######################################
+subnets:
+ - name: dev
+   address: 192.168.11.0
+   prefix: 24
+   netmask: 255.255.255.0
+   gateway: 192.168.11.1
+   vlan_id: 11
+   xen_uuid: 66eee33d-c564-2249-fdff-b1544250f342
 
-# End user VLAN 11
-user_vlan11_network_uuid: 66eee33d-c564-2249-fdff-b1544250f342
-user_vlan11_network: 192.168.11.0
-user_vlan11_network_netmask: 255.255.255.0
-user_vlan11_network_CIDR: 24
-user_vlan11_network_gateway: 192.168.11.1
+ - name: staging
+   address: 192.168.12.0
+   prefix: 24
+   netmask: 255.255.255.0
+   gateway: 192.168.12.1
+   vlan_id: 12
+   xen_uuid: c0f140f4-02ba-45c3-3105-c73bea861c44
+
+ - name: production
+   address: 192.168.13.0
+   prefix: 24
+   netmask: 255.255.255.0
+   gateway: 192.168.13.1
+   vlan_id: 13
+   xen_uuid: 0f14ef4d-1fa9-b0a1-7310-92e8c66f1494
 
 
 #######################################

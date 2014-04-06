@@ -60,22 +60,6 @@
 
  
   ###########################
-  # Network 
-  ###########################
-  - name: Set the hostname and gateway
-    template: src=network.j2 dest=/etc/sysconfig/network
-
-  - name: Copy standard ethernet configuration files
-    template: src=ifcfg-eth.j2 dest=/etc/sysconfig/network-scripts/ifcfg-eth{{ item.device_id }}
-    with_items: networks
-    notify:
-       - restart network
-
-  - name: Copy standard DNS information
-    template: src=resolv.j2 dest=/etc/resolv.conf
-
-
-  ###########################
   # Basic System 
   ###########################
 

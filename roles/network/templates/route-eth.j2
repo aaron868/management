@@ -1,0 +1,6 @@
+{% for subnet in subnets %}
+{% if subnet.name == item.subnet_name %}
+table {{ subnet.name }} to {{ subnet.address }}/{{ subnet.prefix }} dev eth{{item.device_id}}{{ item.vlan_id }}
+table {{ subnet.name }} to default via {{ subnet.gateway }} dev eth{{item.device_id}}{{ item.vlan_id }}
+{% endif %}
+{% endfor %}

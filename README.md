@@ -30,6 +30,9 @@ A play to create a Xen VM.
 ### Base
 The CentOS 6.5 configuration. This is fully SCAP (DISA STIG) compliant except for AIDE. I use OSSEC instead. It disables IPv6. It adds the EPEL repository in an unorthodox but well performing way. I mirror the CentOS and EPEL repos locally for speed and security. 
 
+### network
+A play to configure CentOS ethernet interfaces. See my [blog post](http://wp.me/p4iDAr-7V) for details. 
+
 ### clamav
 This role runs clamav once per day via cron. It also updates the signatures once per day. It does not run the clamav daemon.
 

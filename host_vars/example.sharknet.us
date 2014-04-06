@@ -11,11 +11,28 @@ dns:
  - "{{ dns2_server_ip }}"
 networks:
     - device_id: 0
-      network_uuid: "{{ vlan30_network_uuid }}"
-      mac_address: AF:B7:F3:7D:37:01
-      boot_protocol: static
-      ip_address: 192.168.x.x
-      netmask: 255.255.255.0
+      boot_protocol: none
+      is_vlan: false
+      configure_advanced_networking: false
+
+    - device_id: 0
+      boot_protocol: none
+      ip_address: 192.168.13.13
+      subnet_name: production
+      vlan_id: .13
+      prefix: 24
+      is_vlan: true
+      configure_advanced_networking: true
+
+    - device_id: 0
+      boot_protocol: none
+      subnet_name: dev
+      ip_address: 192.168.11.12
+      vlan_id: .11
+      prefix: 24
+      is_vlan: true
+      configure_advanced_networking: true
+
 partitions:
   var_size: 4096
   home_size: 5120

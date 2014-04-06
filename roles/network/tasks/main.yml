@@ -1,0 +1,36 @@
+---
+
+- name: Set the hostname and gateway
+  template: src=network.j2 dest=/etc/sysconfig/network
+
+- name: Copy standard DNS information
+  template: src=resolv.j2 dest=/etc/resolv.conf
+
+- name: Copy routing table configuration file
+  template: src=rt_tables.j2 
+            dest=/etc/iproute2/rt_tables
+  notify:
+   - restart network
+
+- name: Copy ethernet configuration files
+  template: src=ifcfg-eth.j2 
+            dest=/etc/sysconfig/network-scripts/ifcfg-eth{{ item.device_id }}{{ item.vlan_id }}
+  with_items: networks
+  notify:
+   - restart network
+
+- name: Copy route configuration files
+  template: src=route-eth.j2 
+            dest=/etc/sysconfig/network-scripts/route-eth{{ item.device_id }}{{ item.vlan_id }}
+  with_items: networks
+  when: item.configure_advanced_networking
+  notify:
+   - restart network
+
+- name: Copy rule configuration files
+  template: src=rule-eth.j2 
+            dest=/etc/sysconfig/network-scripts/rule-eth{{ item.device_id }}{{ item.vlan_id }}
+  with_items: networks
+  when: item.configure_advanced_networking
+  notify:
+   - restart network

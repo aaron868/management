@@ -1,0 +1,5 @@
+{% for subnet in subnets %}
+{% if subnet.name == item.subnet_name %}
+from {{ subnet.address }}/{{ subnet.prefix }} table {{ subnet.name }}
+{% endif %}
+{% endfor %}

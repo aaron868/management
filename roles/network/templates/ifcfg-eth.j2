@@ -1,0 +1,24 @@
+# Universal properties
+TYPE=Ethernet
+DEVICE=eth{{ item.device_id }}{{ item.vlan_id }}
+ONBOOT=yes
+NM_CONTROLLED=no
+USERCTL=no
+PEERDNS=no
+IPV6INIT=no
+IPV6_AUTOCONF=no
+# VLAN if present
+{% if item.is_vlan %}
+VLAN=yes
+ONPARENT=yes
+{% endif %}
+# Static or DHCP
+{% if item.boot_protocol == "dhcp" %}
+BOOTPROTO=dhcp
+DHCP_HOSTNAME=`hostname`
+HWADDR={{ item.mac_address }}
+{% else %}
+BOOTPROTO=none
+IPADDR={{ item.ip_address }}
+PREFIX={{ item.prefix }}
+{% endif %}
