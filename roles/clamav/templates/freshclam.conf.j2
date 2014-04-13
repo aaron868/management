@@ -1,0 +1,8 @@
+DatabaseDirectory /var/lib/clamav
+LogSyslog yes
+DatabaseOwner clam
+DatabaseMirror db.us.clamav.net
+DatabaseMirror db.local.clamav.net
+LogTime yes
+HTTPProxyPort {{ web_proxy_port }}
+HTTPProxyServer {{ web_proxy_hostname }}

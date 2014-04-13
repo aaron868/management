@@ -6,6 +6,10 @@
   - name: Enable libselinux-python for Ansible
     yum: name=libselinux-python state=installed
 
+  - name: Set yum configuration
+    template: src=yum.conf.j2 
+              dest=/etc/yum.conf
+
   - name: Copy local repo conf file
     template: src=CentOS-Base.repo.j2 dest=/etc/yum.repos.d/CentOS-Base.repo owner=root group=root mode=0644
 
@@ -58,10 +62,12 @@
   - name: Remove X Windows package
     yum: name="@X Window System" state=absent
 
- 
+
   ###########################
   # Basic System 
   ###########################
+  # - name: Set timezone to eastern
+  #   command: ln -s /usr/share/zoneinfo/US/Eastern /etc/localtime
 
   - name: Set clock
     copy: src=clock dest=/etc/sysconfig/clock owner=root group=root
@@ -84,112 +90,17 @@
   - name: Disable unneeded kernel modules
     copy: src=disabled.conf dest=/etc/modprobe.d/disabled.conf owner=root group=root
 
-  - name: Delete broken default paramaters
-    lineinfile: dest=/etc/sysctl.conf line='{{ item }}' state=absent
-    with_items:
-      - net.bridge.bridge-nf-call-ip6tables = 0
-      - net.bridge.bridge-nf-call-iptables = 0
-      - net.bridge.bridge-nf-call-arptables = 0
+  - name: Set kernel configuration
+    template: src=sysctl.conf.j2
+              dest=/etc/sysctl.conf
+              owner=root
+              group=root
     notify:
-      - reload sysctl.conf
-
-  - name: Restrict Core Dumps
-    lineinfile: dest=/etc/sysctl.conf regexp='^fs.suid_dumpable' line='fs.suid_dumpable = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable ExecShield
-    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.exec-shield' line='kernel.exec-shield = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Randomized Virtual Memory Region Placement
-    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.randomize_va_space' line='kernel.randomize_va_space = 2'
-    notify:
-      - reload sysctl.conf
-
-  - name: Restrict Access to Kernel Message Buffer
-    lineinfile: dest=/etc/sysctl.conf regexp='^kernel.dmesg_restrict' line='kernel.dmesg_restrict = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Sending ICMP Redirects by Default
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.send_redirects' line='net.ipv4.conf.default.send_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Sending ICMP Redirects for All Interfaces
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.send_redirects' line='net.ipv4.conf.all.send_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting Source-Routed Packets for All Interfaces
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.accept_source_route' line='net.ipv4.conf.all.accept_source_route = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting ICMP Redirects for All Interfaces
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.accept_redirects' line='net.ipv4.conf.all.accept_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting Secure Redirects for All Interfaces
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.secure_redirects' line='net.ipv4.conf.all.secure_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Log Martian Packets
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.log_martians' line='net.ipv4.conf.all.log_martians = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting Source-Routed Packets By Default
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.accept_source_route' line='net.ipv4.conf.default.accept_source_route = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting ICMP Redirects By Default
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.accept_redirects' line='net.ipv4.conf.default.accept_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Disable Kernel Parameter for Accepting Secure Redirects By Default
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.secure_redirects' line='net.ipv4.conf.default.secure_redirects = 0'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Ignore ICMP Broadcast Echo Requests
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.icmp_echo_ignore_broadcasts' line='net.ipv4.icmp_echo_ignore_broadcasts = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Ignore Bogus ICMP Error Responses
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.icmp_ignore_bogus_error_responses' line='net.ipv4.icmp_ignore_bogus_error_responses = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Use TCP Syncookies
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.tcp_syncookies' line='net.ipv4.tcp_syncookies = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Use Reverse Path Filtering for All Interfaces
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.all.rp_filter' line='net.ipv4.conf.all.rp_filter = 1'
-    notify:
-      - reload sysctl.conf
-
-  - name: Enable Kernel Parameter to Use Reverse Path Filtering by Default
-    lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv4.conf.default.rp_filter' line='net.ipv4.conf.default.rp_filter = 1'
-    notify:
-      - reload sysctl.conf
-
-  # - name: Disable Accepting IPv6 Redirects
-  #   lineinfile: dest=/etc/sysctl.conf regexp='^net.ipv6.conf.default.accept_redirects' line='net.ipv6.conf.default.accept_redirects = 0'
-  #   notify:
-  #     - reload sysctl.conf
+       - reload sysctl.conf
 
   - name: Disable kdump
     service: name=kdump state=stopped enabled=no
+    ignore_errors: yes
 
   ###########################
   # Maintenance
@@ -270,12 +181,15 @@
 
   - name: Disable prelinking
     lineinfile: dest=/etc/sysconfig/prelink regexp='^PRELINKING' line='PRELINKING=no'
+    ignore_errors: yes
 
   - name: Disable abrtd
     service: name=abrtd  state=stopped enabled=no
+    ignore_errors: yes
 
   - name: Disable atd
     service: name=atd  state=stopped enabled=no
+    ignore_errors: yes
 
   - name: Restrict Virtual Console Root Logins
     lineinfile: dest=/etc/securetty regexp='^vc' state=absent

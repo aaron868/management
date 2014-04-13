@@ -18,8 +18,12 @@
 - name: Set permissions on antivirus database directory
   file: path=/var/lib/clamav state=directory owner=clam group=clam
 
-- name: Set permissions on freshclam configuration
-  file: path=/etc/freshclam.conf owner=root group=root mode=0644
+- name: Set freshclam configuration
+  template: src=freshclam.conf.j2
+            dest=/etc/freshclam.conf 
+            owner=root
+            group=root
+            mode=0644
 
 - name: Daily clamav database update
   cron: name="Daily Virus DB Update"
@@ -50,37 +54,8 @@
   file: path={{ item }} state=absent
   with_items:
     - /etc/cron.d/clamav-unofficial-sigs
+    - /etc/cron.hourly/freshclam
     - /var/log/clamav
     - /var/log/clamav-unofficial-sigs
     - /etc/logrotate.d/freshclam
     - /etc/logrotate.d/clamav-unofficial-sigs
-
-###########################
-# Freshclam conf 
-###########################
-- name: Disable /var/log/clamav logs and use syslog only
-  lineinfile: dest=/etc/freshclam.conf regexp=^UpdateLogFile state=absent
-
-- name: Remove example line
-  lineinfile: dest=/etc/freshclam.conf regexp=^Example state=absent
-
-- name: Include the time in the log
-  lineinfile: dest=/etc/freshclam.conf line='LogTime yes'
-
-- name: Set the virus db
-  lineinfile: dest=/etc/freshclam.conf line='DatabaseDirectory /var/lib/clamav'
-
-- name: Enable syslog logging
-  lineinfile: dest=/etc/freshclam.conf line='LogSyslog yes'
-
-- name: Set 'clam' as the freshclam user
-  lineinfile: dest=/etc/freshclam.conf line='DatabaseOwner clam'
-
-- name: Set the local web proxy host
-  lineinfile: dest=/etc/freshclam.conf line='HTTPProxyServer {{ web_proxy_hostname }}'
-  when: web_proxy_hostname is defined
-
-- name: Set the local web proxy port
-  lineinfile: dest=/etc/freshclam.conf line='HTTPProxyPort {{ web_proxy_port }}'
-  when: web_proxy_port is defined
-
