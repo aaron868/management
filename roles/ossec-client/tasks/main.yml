@@ -1,0 +1,25 @@
+---
+
+- name: Add atomic repository
+  copy: src=atomic.repo dest=/etc/yum.repos.d/atomic.repo owner=root group=root mode=0644
+
+# https://www.atomicorp.com/RPM-GPG-KEY.art.txt
+- name: Add atomic GPG key
+  copy: src=RPM-GPG-KEY.art.txt  
+        dest=/etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt 
+        owner=root 
+        group=root 
+        mode=0644
+        
+- name: Install ossec agent
+  yum: name=ossec-hids-client state=installed
+  notify:
+    - Register client
+  
+- name: Set ossec client config
+  template: src=ossec-agent.conf.j2 dest=/var/ossec/etc/ossec-agent.conf 
+  notify:
+    - Restart ossec
+ 
+- name: Enable ossec
+  service: name=ossec-hids state=started enabled=yes

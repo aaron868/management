@@ -1,0 +1,89 @@
+<ossec_config>
+  <client>
+    <server-ip>{{ ossec_server_ip }}</server-ip>
+  </client>
+
+  <syscheck>
+
+    <!-- Custom -->
+    <auto_ignore>no</auto_ignore>
+    <alert_new_files>yes</alert_new_files>
+    <scan_on_start>no</scan_on_start>
+    <scan_time>4am</scan_time>
+   
+    <!-- Frequency that syscheck is executed -- default every 2 hours -->
+    <frequency>82800</frequency>
+    
+    <!-- Custom -->
+    <directories check_all="yes" realtime="yes">/etc</directories>
+    <directories check_all="yes">/usr/local/bin</directories>
+    <directories check_all="yes" restrict="authorized_keys">/root/.ssh</directories>
+
+    <!-- Directories to check  (perform all possible verifications) -->
+    <directories check_all="yes">/usr/bin,/usr/sbin</directories>
+    <directories check_all="yes">/bin,/sbin</directories>
+    
+    <!-- Files/directories to ignore -->
+    <ignore>/etc/mtab</ignore>
+    <ignore>/etc/mnttab</ignore>
+    <ignore>/etc/hosts.deny</ignore>
+    <ignore>/etc/mail/statistics</ignore>
+    <ignore>/etc/random-seed</ignore>
+    <ignore>/etc/adjtime</ignore>
+    <ignore>/etc/httpd/logs</ignore>
+    <ignore>/etc/utmpx</ignore>
+    <ignore>/etc/wtmpx</ignore>
+    <ignore>/etc/cups/certs</ignore>
+  </syscheck>
+
+  <rootcheck>
+    <rootkit_files>/var/ossec/etc/shared/rootkit_files.txt</rootkit_files>
+    <rootkit_trojans>/var/ossec/etc/shared/rootkit_trojans.txt</rootkit_trojans>
+  </rootcheck>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/messages</location>
+  </localfile>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/iptables.log</location>
+  </localfile>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/secure</location>
+  </localfile>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/maillog</location>
+  </localfile>
+
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/audit/audit.log</location>
+  </localfile>
+
+  <!-- Custom -->
+
+  <!-- Test firewall rule state -->
+  <localfile>
+   <log_format>full_command</log_format>
+   <command>/sbin/iptables -nL</command>
+  </localfile>
+
+  <!-- Test listening ports -->
+  <localfile>
+   <log_format>full_command</log_format>
+   <command>netstat -tan |grep LISTEN |grep -v 127.0.0.1 | sort</command>
+  </localfile>
+
+  <!-- Check WTMP recent commands -->
+  <localfile>
+     <log_format>full_command</log_format>
+     <command>last -n 5</command>
+  </localfile>
+
+</ossec_config>

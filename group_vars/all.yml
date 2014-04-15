@@ -68,6 +68,15 @@ admin_network_CIDR: 24
 ssh_port: 22
 
 #######################################
+# OSSEC
+#######################################
+ossec_server_ip: 192.168.x.x
+ossec_authd_port: 1515
+ossec_server_port: 1514
+ossec_from_email: ossec@example.com
+ossec_server_hostname: ossec-server
+
+#######################################
 # Repository configuration
 #######################################
 default_repository_mirror_hostname: rsync://mirrors.usc.edu

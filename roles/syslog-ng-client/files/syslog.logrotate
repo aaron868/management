@@ -1,0 +1,13 @@
+/var/log/cron
+/var/log/maillog
+/var/log/messages
+/var/log/secure
+/var/log/spooler
+/var/log/kern
+/var/log/lastlog
+{
+    sharedscripts
+    postrotate
+        /usr/bin/killall -HUP syslog-ng
+    endscript
+}

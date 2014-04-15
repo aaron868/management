@@ -1,0 +1,9 @@
+/var/log/iptables.log {
+    rotate 4
+    weekly
+    missingok
+    notifempty
+    postrotate
+        /usr/bin/killall -HUP syslog-ng
+    endscript
+}

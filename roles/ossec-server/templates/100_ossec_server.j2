@@ -1,0 +1,7 @@
+table filter chain INPUT {
+      # authd traffic
+      protocol tcp dport {{ ossec_authd_port }} ACCEPT;
+
+      # OSSEC server traffic
+      protocol udp dport {{ 1514 }} ACCEPT;
+}

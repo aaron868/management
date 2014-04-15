@@ -1,0 +1,16 @@
+destination d_remote_file {  file("{{ remote_log_path }}/$HOST.log"); };
+
+source s_syslog_listener { 
+   tcp(port({{ syslog_tcp_port }}) flags(syslog-protocol) );
+   udp(port( {{ syslog_udp_port }} ) so_rcvbuf(2097152) flags(syslog-protocol) );
+};
+
+log { 
+    source(s_syslog_listener); 
+    destination(d_remote_file);
+};
+
+log { 
+    source(s_syslog_listener); 
+    destination(d_log_server);
+};

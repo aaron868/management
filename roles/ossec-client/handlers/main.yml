@@ -1,0 +1,8 @@
+---
+
+- name: Register client
+  command: /var/ossec/bin/agent-auth -m {{ ossec_server_ip }} -p {{ ossec_authd_port }}
+  
+- name: Restart ossec
+  service: name=ossec-hids state=restarted
+ 

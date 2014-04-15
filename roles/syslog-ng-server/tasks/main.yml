@@ -1,0 +1,18 @@
+---
+
+- name: Create client logs directory
+  file: path={{ remote_log_path }} state=directory owner=root group=root
+
+- name: Create client logs archive directory
+  file: path={{ remote_log_path }}/archive state=directory owner=root group=root
+
+- name: Copy server log configuration
+  template: src=server.conf.j2 dest=/etc/syslog-ng/syslog-ng.d/server.conf owner=root group=root
+  notify:
+    - restart syslog-ng
+
+- name: Set iptables configuration
+  template: src=107_log_server.j2 dest=/etc/ferm/ferm.d/107_log_server owner=root group=root
+
+- name: Copy logrotate configuration
+  template: src=syslog_server.rotate.j2 dest=/etc/logrotate.d/syslog_server

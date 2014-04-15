@@ -57,8 +57,25 @@ A complete NTP client.
 ### ntp-server
 A, hopefully, well tuned NTP server configuration. I still want to look into crypto for this.
 
+### ossec-client
+A basic OSSEC client configuration. Uses out-of-the-box settings with the addition of a few simple extra rules to monitor IPtable and network ports. In your plays make sure the OSSEC server is running before you run the clients. The clients need to register with the server.
+
+### ossec-server
+A basic OSSEC server using ut-of-the-box settings. This role is designed to serve as a relay for network devices that only speak syslog. The devices connect to syslog-ng on this server and their logs are stored as files for the OSSEC engine. The logs are then forwarded to the central logging server for archiving. 
+
+See this [blog post](http://sharknet.us/2014/04/15/ansible-ossec-role) for details.
+
 ### squid-server
-A simple but functional squid server configuration. 
+A simple but functional squid server configuration.
+
+### syslog-ng-client
+This role replace rsyslog with syslog-ng. It is a drop-in replacement for rsyslog. It also forwards logs to a central log server. I intend to add SSL to this role in the near future so that all log traffic is encrypted.
+
+### syslog-ng-relay
+This is designed to be used with the `ossec-server` role. It listens for syslog for network traffic and does two things with it: stores it in a local file and forwards it to another syslog-ng server.
+
+### syslog-ng-server
+This role allows the server to act as a central log archive. All device and host logs are sent to this server and stored as files, one per host. The raw logs are stored and could also be sent to a structured storage engine such as Elasticsearch.
 
 ### end
 As you may have guessed from its name, this role should run at the very end. It allows you to follow the Unix `directory.d` pattern. Roles can add files to a `dir.d` folder and then this role will cause the daemon being configured to restart. This is needed for iptables, collectd, and others. It makes up for the lack of support by Ansible for global handlers.

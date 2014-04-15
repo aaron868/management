@@ -1,0 +1,5 @@
+table filter chain INPUT {
+       # syslog
+      protocol udp dport {{ syslog_udp_port }} ACCEPT;
+      protocol tcp dport {{ syslog_tcp_port }} ACCEPT;
+}

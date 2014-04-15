@@ -1,0 +1,12 @@
+{{ remote_log_path }}/*.log {
+    missingok
+    daily
+    dateext
+    compress
+    create
+    rotate 90
+    olddir archive
+    postrotate
+        /usr/bin/killall -HUP syslog-ng
+    endscript
+}

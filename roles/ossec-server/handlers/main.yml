@@ -1,0 +1,12 @@
+---
+
+- name: Initialize ossec
+  command: /var/ossec/bin/ossec-control restart
+  notify:
+    - Enable syslog client
+
+- name: Enable syslog client
+  command: /var/ossec/bin/ossec-control enable client-syslog
+
+- name: Restart ossec
+  service: name=ossec-hids state=restarted

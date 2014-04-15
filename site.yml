@@ -22,6 +22,16 @@
    - ntp-client
    - email-client
    - ossec-client
-   - collectd-client
    - syslog-ng-server
+   - end
+
+- hosts: ossec-server.sharknet.us
+  user: administrator
+  sudo: yes
+  gather_facts: False
+  roles:
+   - ntp-client
+   - email-client
+   - ossec-server
+   - syslog-ng-relay
    - end

@@ -1,0 +1,46 @@
+---
+
+- name: Unistall rsyslog
+  yum: name="rsyslog" state=absent
+
+- name: Install new syslog-ng and re-install cron
+  yum: name={{ item }}
+       state=installed
+  with_items:
+    - syslog-ng
+    - cronie
+    - cronie-anacron
+    - crontabs
+
+- name: Copy log modules configuration
+  copy: src=modules.conf dest=/etc/syslog-ng/modules.conf owner=root group=root
+  notify:
+    - restart syslog-ng
+
+- name: Create syslog-ng snippets directory
+  file: path=/etc/syslog-ng/syslog-ng.d state=directory owner=root group=root
+
+- name: Copy iptables log configuration
+  copy: src=iptables.conf dest=/etc/syslog-ng/syslog-ng.d/iptables.conf owner=root group=root
+  notify:
+    - restart syslog-ng
+
+- name: Set syslog-ng configuration
+  template: src=syslog-ng.conf.j2 dest=/etc/syslog-ng/syslog-ng.conf owner=root group=root
+  notify:
+    - restart syslog-ng
+
+- name: Ensure syslog-ng is running
+  service: name=syslog-ng state=started enabled=yes
+
+###########################
+# Log rotation
+###########################
+- name: Copy logrotate configuration
+  template: src=logrotate.conf.j2 dest=/etc/logrotate.conf
+
+- name: Install syslog logrotate configuration
+  copy: src=syslog.logrotate dest=/etc/logrotate.d/syslog owner=root group=root mode=0644
+
+- name: Install iptables logrotate configuration
+  copy: src=iptables.logrotate dest=/etc/logrotate.d/iptables owner=root group=root mode=0644

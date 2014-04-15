@@ -1,0 +1,23 @@
+destination d_remote_file {  file("{{ remote_log_path }}/$HOST.log"); };
+destination d_ossec_alert_file {  file("{{ remote_log_path }}/ossec_alerts.log"); };
+
+filter alert_filter { 
+    host("{{ ossec_server_hostname }}") and program("ossec"); 
+};
+
+source s_syslog_listener { 
+   tcp(port({{ syslog_tcp_port }}) flags(syslog-protocol) );
+   udp(port( {{ syslog_udp_port }} ) so_rcvbuf(2097152) flags(syslog-protocol) );
+};
+
+log { 
+    source(s_syslog_listener);  
+    filter(alert_filter); 
+    destination(d_ossec_alert_file);
+    flags(final); 
+};
+
+log { 
+    source(s_syslog_listener); 
+    destination(d_remote_file);
+};
