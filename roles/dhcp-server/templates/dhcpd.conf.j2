@@ -1,0 +1,40 @@
+# DHCP server is authoritative for all networks
+authoritative;
+
+# RFC3442 routes
+option rfc3442-classless-static-routes code 121 = array of integer 8;
+# MS routes
+option ms-classless-static-routes code 249 = array of integer 8;
+
+# Default lease time of 4 hours minutes, max 8 hour
+default-lease-time 21600;
+max-lease-time 43200;
+
+# Log to local syslog
+log-facility local7;
+
+##############################
+# Global parameters
+##############################
+option domain-name-servers {{ dns1_server_ip }}, {{ dns2_server_ip }};
+option domain-name "{{ domain }}";
+option ntp-servers {{ ntp_server_ip }};
+option domain-search "{{ domain }}";
+ddns-domainname "{{ domain }}";
+option time-offset -18000;  # Eastern Standard Time
+option host-name = config-option server.ddns-hostname;
+    ddns-hostname = pick-first-value( option fqdn.hostname,
+                                      option host-name,
+                                      concat("dhcp-", binary-to-ascii(10, 8, "-", leased-address)));
+##############################
+# Subnet parameters
+##############################
+
+{% for subnet in subnets %}
+# DHCP settings for the {{ subnet.name }} network
+subnet {{ subnet.address }} netmask {{ subnet.netmask }} {
+    option routers {{ subnet.gateway }};    
+    range {{ subnet.dhcp_start_address }} {{ subnet.dhcp_end_address }};
+}
+
+{% endfor %}

@@ -42,6 +42,9 @@ This role uses a helper application called 'ferm' to manage iptables.
 ### auditd
 This role uses the default CentOS configuration plus the DISA STIG settings. I have not added anything additional customizations.
 
+### dhcp-server
+A basic ISC DHCP server configuration.
+
 ### kickstart-server
 This is meant to be run by the server that stores the kickstart files and serves them from the web. The interesting thing here is the kickstart template. It is SCAP compliant and Xen specific.
 

@@ -4,7 +4,7 @@
     <email_notification>yes</email_notification>
     <email_to>{{ admin_email_address }}</email_to>
     <smtp_server>localhost</smtp_server>
-    <email_from>{{ ossec_from_email }}</email_from>
+    <email_from>{{ ossec_from_email_address }}@sharknet.us</email_from>
     <logall>no</logall>
   </global>
 
@@ -112,8 +112,9 @@
 
   <global>
     <white_list>127.0.0.1</white_list>
-    <white_list>{{ dev_vlan30_network }}/{{ dev_vlan30_network_CIDR }}</white_list>
-    <white_list>{{ prod_vlan12_network }}/{{ prod_vlan12_network_CIDR }}</white_list>
+   {% for subnet in subnets %}
+   <white_list>{{ subnet.address }}/{{ subnet.prefix }}</white_list>
+   {% endfor %}
   </global>
 
   <remote>
@@ -214,7 +215,6 @@
      <command>last -n 5</command>
   </localfile>
 
-<!-- Check log files from devices -->
 {% for item in device_clients %}
   <localfile>
      <log_format>syslog</log_format>

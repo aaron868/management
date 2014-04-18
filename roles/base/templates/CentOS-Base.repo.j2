@@ -14,7 +14,7 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 #additional packages that may be useful
 [extras]
 name=CentOS-$releasever - Extras
-baseurl=http://asimov.sharknet.us/CentOS/$releasever/extras/$basearch/
+baseurl=http://{{ default_repository_hostname }}/CentOS/$releasever/extras/$basearch/
 gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 

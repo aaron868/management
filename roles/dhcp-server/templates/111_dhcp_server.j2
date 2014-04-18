@@ -1,0 +1,5 @@
+table filter chain INPUT {
+       # DHCP
+      protocol udp dport 67 ACCEPT;
+      protocol udp dport 68 ACCEPT;
+}

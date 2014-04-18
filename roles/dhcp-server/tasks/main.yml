@@ -1,0 +1,20 @@
+---
+
+- name: Install ISC dhcp server
+  yum: name=dhcp state=installed
+
+- name: Copy dhcpd conf file
+  template: src=dhcpd.conf.j2 dest=/etc/dhcp/dhcpd.conf owner=root group=root mode=0644
+  notify:
+    - restart dhcpd
+
+- name: Copy dhcpd arguments file
+  template: src=dhcpd.j2 dest=/etc/sysconfig/dhcpd owner=root group=root mode=0644 
+  notify:
+    - restart dhcpd
+
+- name: Set iptables configuration
+  template: src=111_dhcp_server.j2 dest=/etc/ferm/ferm.d/111_dhcp_server owner=root group=root
+
+- name: dhcpd running
+  service: name=dhcpd state=started enabled=yes
