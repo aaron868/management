@@ -6,7 +6,7 @@
     delegate_to: "{{ pool_master }}"
 
   - name: Create VM
-    command: xe vm-install template={{ centos_template_uuid }} new-name-label="{{ hostname }}" sr-uuid={{ primary_sr_uuid }}
+    command: xe vm-install template={{ centos_template_uuid }} new-name-label="{{ hostname }}" sr-uuid={{ storage_device }}
     register: vm
     delegate_to: "{{ pool_master }}"
 
@@ -17,19 +17,34 @@
   - name: Set the location of the kickstart file
     command: xe vm-param-set uuid={{ vm.stdout }} PV-args="ks={{ kickstart_url }}/{{ hostname }}.cfg ksdevice=eth0"
     delegate_to: "{{ pool_master }}"
-    
+  
+  - name: Set the VM to autostart on boot
+    command: xe vm-param-set uuid={{ vm.stdout }} other-config:auto_poweron=true
+    delegate_to: "{{ pool_master }}"
+        
   - name: Adding networks
-    command: xe vif-create vm-uuid={{ vm.stdout }} network-uuid={{ item.network_uuid }} mac={{ item.mac_address }} device={{ item.device_id }}
+    command: xe vif-create vm-uuid={{ vm.stdout }} network-uuid={{ item.network_uuid }} mac=random device={{ item.device_id }}
     delegate_to: "{{ pool_master }}"
     with_items: networks
 
   - name: Allocate VM storage
-    command: xe vdi-create name-label="{{ hostname }} storage" sr-uuid={{ primary_sr_uuid }} type=system virtual-size={{ storage }}
+    command: xe vdi-create name-label="{{ hostname }} storage" sr-uuid={{ storage_device }} type=system virtual-size={{ storage }}
     register: disk
     delegate_to: "{{ pool_master }}"
 
   - name: Assign storage to VM
     command: xe vbd-create vdi-uuid={{ disk.stdout }} vm-uuid={{ vm.stdout }} type=Disk bootable=true device=0
+    delegate_to: "{{ pool_master }}"
+
+  - name: Allocate extra VM storage
+    command: xe vdi-create name-label="{{ hostname }} extra storage" sr-uuid={{ primary_sr_uuid }} type=user virtual-size={{ extra_vm_storage }} sm-config:type=raw
+    register: extra_disk
+    when: has_extra_storage
+    delegate_to: "{{ pool_master }}"
+
+  - name: Assign extra storage to VM
+    command: xe vbd-create vdi-uuid={{ extra_disk.stdout }} vm-uuid={{ vm.stdout }} type=Disk mode=RW device=1
+    when: has_extra_storage
     delegate_to: "{{ pool_master }}"
 
   - name: Set the VM RAM limits
