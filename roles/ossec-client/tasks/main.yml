@@ -1,7 +1,11 @@
 ---
 
 - name: Add atomic repository
-  copy: src=atomic.repo dest=/etc/yum.repos.d/atomic.repo owner=root group=root mode=0644
+  template: src=atomic.repo.j2
+            dest=/etc/yum.repos.d/atomic.repo
+            owner=root
+            group=root
+            mode=0644
 
 # https://www.atomicorp.com/RPM-GPG-KEY.art.txt
 - name: Add atomic GPG key

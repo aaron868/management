@@ -1,11 +1,11 @@
 ---
 
 - name: Add atomic repository
-  copy: src=atomic.repo 
-        dest=/etc/yum.repos.d/atomic.repo
-        owner=root
-        group=root
-        mode=0644
+  template: src=atomic.repo.j2
+            dest=/etc/yum.repos.d/atomic.repo
+            owner=root
+            group=root
+            mode=0644
 
 # https://www.atomicorp.com/RPM-GPG-KEY.art.txt
 - name: Add atomic GPG key
@@ -22,6 +22,12 @@
             group=root
             mode=0755
 
+- name: Install ossec server
+  yum: name=ossec-hids-server 
+       state=installed
+  notify:
+    - Initialize ossec
+
 - name: Install ossec server private SSL key
   copy: src=ossec.key
         dest=/var/ossec/etc/sslmanager.key
@@ -35,20 +41,6 @@
         owner=root 
         group=root 
         mode=0644
-
-- name: Install ossec server
-  yum: name=ossec-hids-server 
-       state=installed
-  notify:
-    - Initialize ossec
-
-- name: Ensure ossec server is running and enabled at start up
-  service: name={{ item }}
-           state=started
-           enabled=yes
-  with_items:
-    - ossec-hids
-    - ossec-authd
 
 - name: Set ossec server config
   template: src=ossec-server.conf.j2 
@@ -65,3 +57,11 @@
             dest=/etc/ferm/ferm.d/100_ossec_server 
             owner=root 
             group=root
+
+- name: Ensure ossec server is running and enabled at start up
+  service: name={{ item }}
+           state=started
+           enabled=yes
+  with_items:
+    - ossec-hids
+    - ossec-authd

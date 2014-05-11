@@ -3,7 +3,20 @@
 - name: Initialize ossec
   command: /var/ossec/bin/ossec-control restart
   notify:
+    # - Generate key
+    # - Generate cert
+    # - Run authd
     - Enable syslog client
+
+# - name: Generate key
+#   command: openssl genrsa -out /var/ossec/etc/sslmanager.key 2048
+
+# - name: Generate cert
+#   command: openssl req -new -x509 -key /var/ossec/etc/sslmanager.key -out /var/ossec/etc/sslmanager.cert -days 365
+
+# - name: Run authd
+#   #command: /var/ossec/bin/ossec-authd -p 1515
+#   service: name=ossec-authd state=started
 
 - name: Enable syslog client
   command: /var/ossec/bin/ossec-control enable client-syslog

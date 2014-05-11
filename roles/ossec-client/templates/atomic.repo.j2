@@ -1,0 +1,12 @@
+# Name: ADFtomic Rocket Turtle RPM Repository for CentOS / Red Hat Enterprise Linux 6 -
+# URL: http://www.atomicrocketturtle.com/
+# Note: This isn't covered by ASL support. -Scott
+[atomic]
+name = CentOS / Red Hat Enterprise Linux $releasever - atomicrocketturtle.com
+#mirrorlist = http://updates.atomicorp.com/channels/mirrorlist/atomic/centos-$releasever-$basearch
+baseurl = http://www5.atomicorp.com/channels/ossec/centos/{{ centos_series }}/{{ centos_architecture }}
+enabled = 1
+priority = 1
+protect = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY.art.txt
+gpgcheck = 1

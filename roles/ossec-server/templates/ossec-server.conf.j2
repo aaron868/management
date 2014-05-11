@@ -1,10 +1,10 @@
 
 <ossec_config>
   <global>
-    <email_notification>yes</email_notification>
+    <email_notification>no</email_notification>
     <email_to>{{ admin_email_address }}</email_to>
     <smtp_server>localhost</smtp_server>
-    <email_from>{{ ossec_from_email_address }}@sharknet.us</email_from>
+    <email_from>{{ ossec_from_email_address }}@{{ domain }}</email_from>
     <logall>no</logall>
   </global>
 
@@ -15,7 +15,7 @@
     <format>default</format>
   </syslog_output>
 
-  <rules>
+<rules>
     <include>rules_config.xml</include>
     <include>pam_rules.xml</include>
     <include>sshd_rules.xml</include>
@@ -76,7 +76,6 @@
     <include>local_rules.xml</include>
   </rules>
 
-
   <syscheck>
      <!-- Custom -->
     <auto_ignore>yes</auto_ignore>
@@ -120,6 +119,13 @@
   <remote>
     <connection>secure</connection>
   </remote>
+
+  <email_alerts>
+    <email_to>{{ admin_email_address }}</email_to>
+    <level>7</level>
+    <do_not_delay />
+    <do_not_group />
+  </email_alerts>
 
   <alerts>
     <log_alert_level>1</log_alert_level>

@@ -67,20 +67,16 @@
   </localfile>
 
   <!-- Custom -->
-
-  <!-- Test firewall rule state -->
   <localfile>
    <log_format>full_command</log_format>
    <command>/sbin/iptables -nL</command>
   </localfile>
 
-  <!-- Test listening ports -->
   <localfile>
    <log_format>full_command</log_format>
    <command>netstat -tan |grep LISTEN |grep -v 127.0.0.1 | sort</command>
   </localfile>
 
-  <!-- Check WTMP recent commands -->
   <localfile>
      <log_format>full_command</log_format>
      <command>last -n 5</command>
