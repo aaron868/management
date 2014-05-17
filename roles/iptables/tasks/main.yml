@@ -16,7 +16,15 @@
   file: path=/etc/ferm/ferm.d owner=root group=root mode=0700 state=directory
 
 - name: Set iptables base configuration
-  template: src=ferm.conf.j2 dest=/etc/ferm/ferm.conf owner=root group=root
+  template: src=ferm.conf.j2 
+            dest=/etc/ferm/ferm.conf 
+            owner=root 
+            group=root
+
+# - name: Block all IPv6 traffic
+#   template: src=ferm6.conf.j2 dest=/etc/ferm/ferm6.conf owner=root group=root
+#   notify:
+#     - Install IPv6
 
 - name: Set iptables end configuration
   copy: src=999_end dest=/etc/ferm/ferm.d/999_end owner=root group=root

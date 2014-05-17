@@ -9,3 +9,5 @@
 - name: reload sysctl.conf
   command: /sbin/sysctl -p
 
+- name: reload init
+  command: initctl reload-configuration

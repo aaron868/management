@@ -1,8 +1,5 @@
 ---
 
-  - name: Enable auditing
-    service: name=auditd  state=started enabled=yes
-
   - name: Set auditd configuration
     copy: src=auditd.conf dest=/etc/audit/auditd.conf owner=root group=root mode=0640
     notify:
@@ -12,3 +9,15 @@
     template: src=audit.rules.j2 dest=/etc/audit/audit.rules owner=root group=root mode=0640
     notify:
      - restart auditd
+
+  - name: Enable syslog plugin
+    copy: src=syslog.conf
+          dest=/etc/audisp/plugins.d/syslog.conf
+          owner=root 
+          group=root
+          mode=0640
+
+  - name: Enable auditing
+    service: name=auditd  
+             state=started 
+             enabled=yes

@@ -16,8 +16,13 @@
   - name: Copy local epel repo
     template: src=epel.repo.j2 dest=/etc/yum.repos.d/epel.repo owner=root group=root mode=0644
 
+  # http://mirror.pnl.gov/epel/RPM-GPG-KEY-EPEL-6
   - name: Add EPEL GPG key
-    get_url: url=http://mirror.pnl.gov/epel/RPM-GPG-KEY-EPEL-6  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 owner=root group=root mode=0644
+    copy: src=RPM-GPG-KEY-EPEL-6  
+          dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 
+          owner=root
+          group=root
+          mode=0644
 
   - name: Disable fastest mirror plugin
     lineinfile: dest=/etc/yum/pluginconf.d/fastestmirror.conf regexp=^enabled line='enabled = 1'
@@ -26,12 +31,14 @@
     yum: name={{ item }} state=installed
     with_items:
       - yum-plugin-protectbase.noarch
+      - yum-plugin-security
       - mlocate
       - vim-minimal
       - mailx
       - ntp
-      - git
       - wget
+      - screen
+      - psacct
 
   - name: Remove uneeded packages
     yum: name={{ item }} state=absent
@@ -58,7 +65,11 @@
       - tcpmux-server
       - autofs
       - wireless-tools
- 
+      - avahi-libs
+      - abrt
+      - polkit
+      - dbus
+
   - name: Remove X Windows package
     yum: name="@X Window System" state=absent
 
@@ -130,7 +141,7 @@
 
   - name: Ensure boot is password protected
     lineinfile: dest=/etc/grub.conf regexp=^password line='password --encrypted $6$p5lIqMXvh0h06WQM$8uBgmOVe..2sy7lFHfifxwddW7cnER2mFYGIBddEixFGWGOojqbgzOcVSEpwQBMC.9cvkp3jp1WelqDsmJxBI.'
- 
+
   - name: Enable Auditing for Processes Which Start Prior to the Audit Daemon
     command: sed -i '/kernel/ {/audit=1/! s/.*/& audit=1/}' /etc/grub.conf
 
@@ -173,6 +184,16 @@
       - /usr/sbin
       - /usr/local/sbin
 
+  - name: Verify that System Executables Have Restrictive Permissions
+    file: path={{ item }} owner=root group=root state=directory mode=0555
+    with_items:
+      - /bin
+      - /usr/bin
+      - /usr/local/bin
+      - /sbin
+      - /usr/sbin
+      - /usr/local/sbin
+
   - name: Set Daemon Umask
     lineinfile: dest=/etc/sysconfig/init regexp=^umask line='umask 027'
 
@@ -198,7 +219,7 @@
     lineinfile: dest=/etc/securetty regexp='^tty' state=absent
 
   - name: Prevent Log In to Accounts With Empty Password
-    copy: src=system-auth dest=/etc/pam.d/system-auth owner=root group=root mode=0644
+    copy: src=system-auth dest=/etc/pam.d/system-auth-ac owner=root group=root mode=0644
 
   - name: Set Password Attributes
     copy: src=login.defs dest=/etc/login.defs owner=root group=root mode=0644
@@ -208,6 +229,48 @@
 
   - name: Modify the System Login Banner
     copy: src=issue dest=/etc/issue owner=root group=root mode=0644
+
+  - name: Set csh secure umask
+    copy: src=csh.cshrc
+          dest=/etc/csh.cshrc
+          owner=root
+          group=root
+          mode=0644
+
+  - name: Set bash secure umask
+    copy: src=bashrc
+          dest=/etc/bashrc
+          owner=root
+          group=root
+          mode=0644
+
+  - name: Disable CONTROL-ALT-DELETE
+    copy: src=control-alt-delete.override
+          dest=/etc/init/control-alt-delete.override
+          owner=root
+          group=root
+          mode=0644
+    notify:
+      - reload init
+
+  - name: Limit simultaneous Logins
+    copy: src=limits.conf
+          dest=/etc/security/limits.conf
+          owner=root
+          group=root
+          mode=0644
+
+  - name: Set new user account security
+    copy: src=useradd
+          dest=/etc/default/useradd
+          owner=root
+          group=root
+          mode=0600
+  
+  - name: Enable prcess accounting
+    service: name=psacct
+             state=started
+             enabled=yes
 
   ###########################
   # cron 

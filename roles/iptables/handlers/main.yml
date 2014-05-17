@@ -2,3 +2,6 @@
 
 - name: Restart rsyslog
   command: service rsyslog restart
+
+- name: Install IPv6
+  command: /usr/sbin/ferm /etc/ferm/ferm6.conf

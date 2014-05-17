@@ -1,0 +1,16 @@
+---
+
+  - name: sshd running
+    service: name=sshd state=started enabled=yes
+
+  - name: Add .ssh directory to root
+    file: path=/home/{{ administrator_username }}/.ssh owner={{ administrator_username }} group={{ administrator_username }} mode=0700 state=directory 
+
+  - name: Set authorized keys
+    authorized_key: user={{ administrator_username }}
+                    key="{{ lookup('file', '../../../keys/admin_public_key') }}"
+                    
+  - name: Set ssh root config 
+    copy: src=sshd_config dest=/etc/ssh/sshd_config owner=root group=root mode=0600
+    notify:
+    - restart sshd

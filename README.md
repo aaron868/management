@@ -60,6 +60,9 @@ A complete NTP client.
 ### ntp-server
 A, hopefully, well tuned NTP server configuration. I still want to look into crypto for this.
 
+### ssh
+An basic OpenSSH server configuration that conforms to the DISA STIG. See the `tasks/main.yml` file for a few variable you have to set. Change the `authorized_key` line to point to the path where you have the public key file for passwordless SSH.
+
 ### ossec-client
 A basic OSSEC client configuration. Uses out-of-the-box settings with the addition of a few simple extra rules to monitor IPtable and network ports. In your plays make sure the OSSEC server is running before you run the clients. The clients need to register with the server.
 

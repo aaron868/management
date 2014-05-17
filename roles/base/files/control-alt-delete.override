@@ -1,0 +1,1 @@
+exec /usr/bin/logger -p security.info "Ctrl-Alt-Delete pressed"

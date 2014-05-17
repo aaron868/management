@@ -17,7 +17,8 @@ domain ip {
             proto icmp icmp-type echo-request ACCEPT;
             
             # remote administration from the company network
-            saddr {{ admin_network }}/{{ admin_network_CIDR }} proto tcp dport ssh ACCEPT;
+            # saddr {{ admin_network }}/{{ admin_network_CIDR }} proto tcp dport ssh ACCEPT;
+            proto tcp dport ssh ACCEPT;
             
         }
         chain LOGGING {

@@ -24,7 +24,7 @@
 -w /etc/security/opasswd -p wa -k audit_account_changes
 
 # audit_network_modifications
--a always,exit -F arch=b64 -S sethostname -S setdomainname -k audit_network_modifications
+-a exit,always -F arch=b64 -S sethostname -S setdomainname -k audit_network_modifications
 -w /etc/issue -p wa -k audit_network_modifications
 -w /etc/issue.net -p wa -k audit_network_modifications
 -w /etc/hosts -p wa -k audit_network_modifications
@@ -70,3 +70,6 @@
 -w /sbin/rmmod -p x -k modules
 -w /sbin/modprobe -p x -k modules
 -a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+
+# Audit setuid programs
+-a always,exit -F path=/usr/bin/screen -F perm=x -F auid>=500 -F auid!=4294967295 -k privileged
