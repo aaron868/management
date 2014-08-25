@@ -109,6 +109,16 @@
     notify:
        - reload sysctl.conf
 
+  - name: Detect exec-shield
+    action: stat path=/proc/sys/kernel/exec-shield
+    register: exec_shield
+
+  - name: Enable exec-shield
+    lineinfile: dest=/etc/sysctl.conf state=present regexp='^kernel.exec-shield' line='kernel.exec-shield = 1'
+    when: exec_shield.stat.exists == True
+    notify:
+      - reload sysctl.conf
+
   - name: Disable kdump
     service: name=kdump state=stopped enabled=no
     ignore_errors: yes
